@@ -222,7 +222,7 @@ function blockCard(w,[t,c,code,topic,p,o={}],timeText){
        if(c==="FIN"&&!finShown(w,o)){code="FIN512";topic="Financial Accounting";p={n:["Topic and pre-reading for this class are being confirmed"]};o={};}
        const rows=GROUPS.map(([k])=>k).filter(k=>(p[k]||[]).length).map(k=>`<dt>${LBL[k]}</dt><dd>${p[k].map(esc).join("<br>")}</dd>`).join("");
        return `<div class="blk c-${c}"><div class="time">${esc(timeText)}</div>
-       <div class="body"><div class="code">${esc(code)}${o.est?'<span class="est">est.</span>':""}${c==="FIN"?'<span class="est">no AI</span>':""}</div>
+       <div class="body"><div class="code">${esc(code)}${o.est?'<span class="est">est.</span>':""}</div>
         <div class="topic">${o.due?`<span class="pill">${esc(o.due)}</span>`:""}${esc(topic)}</div>
         ${(p.n||[]).length?`<div class="note">${p.n.map(esc).join(" · ")}</div>`:""}
         ${rows?`<div class="prep"><dl>${rows}</dl></div>`:((p.n||[]).length?"":`<div class="prep">No prep listed.</div>`)}</div></div>`}
