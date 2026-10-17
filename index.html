@@ -12,7 +12,7 @@
 :root{
   --bg:#f6f7f4; --surface:#ffffff; --ink:#18201c; --muted:#5d6862; --line:#dde2dc; --accent:#0f6b4f;
   --ent:#c2410c; --ecn:#1d4ed8; --fin:#0f766e; --mgt:#7c3aed; --lead:#b45309;
-  --due-bg:#fde8e1; --due-ink:#9a2d0d;
+  --due-bg:#fde8e1; --due-ink:#9a2d0d; --brk-bg:#eef1ec; --brk-ink:#4b5650;
   --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --f-body:"Instrument Sans", "Segoe UI", system-ui, sans-serif;
   --f-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
@@ -20,11 +20,11 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#111613; --surface:#1a201c; --ink:#e7ece8; --muted:#9aa59f; --line:#2c3530; --accent:#4fd1a5;
   --ent:#fb923c; --ecn:#7aa2ff; --fin:#2dd4bf; --mgt:#b79bff; --lead:#f5b74a;
-  --due-bg:#3a1d14; --due-ink:#ffb59c; color-scheme:dark;}}
+  --due-bg:#3a1d14; --due-ink:#ffb59c; --brk-bg:#222a25; --brk-ink:#b7c2bc; color-scheme:dark;}}
 :root[data-theme="dark"]{
   --bg:#111613; --surface:#1a201c; --ink:#e7ece8; --muted:#9aa59f; --line:#2c3530; --accent:#4fd1a5;
   --ent:#fb923c; --ecn:#7aa2ff; --fin:#2dd4bf; --mgt:#b79bff; --lead:#f5b74a;
-  --due-bg:#3a1d14; --due-ink:#ffb59c; color-scheme:dark;}
+  --due-bg:#3a1d14; --due-ink:#ffb59c; --brk-bg:#222a25; --brk-ink:#b7c2bc; color-scheme:dark;}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);}
 .wrap{max-width:980px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
@@ -54,6 +54,11 @@ h2{font:600 24px/1.2 var(--f-display);margin:0}
 .prep{color:var(--muted);font-size:14px}
 .pill{display:inline-block;font:600 11px var(--f-body);letter-spacing:.04em;text-transform:uppercase;background:var(--due-bg);color:var(--due-ink);border-radius:4px;padding:2px 7px;margin-right:6px}
 .est{font:500 11px var(--f-mono);color:var(--muted);border:1px dashed var(--line);border-radius:4px;padding:1px 6px;margin-left:6px}
+.brk{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center;background:repeating-linear-gradient(135deg,var(--brk-bg) 0 8px,transparent 8px 12px);border-radius:8px;padding:6px 8px;margin-inline:-8px;color:var(--brk-ink)}
+.brk .time{color:var(--brk-ink)}
+.brk .lbl{font:600 13px var(--f-body);display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.brk .dur{font:500 11.5px var(--f-mono);opacity:.8}
+.cont{font-size:13px;color:var(--muted)}
 .c-ENT{--c:var(--ent)}.c-ECN{--c:var(--ecn)}.c-FIN{--c:var(--fin)}.c-MGT{--c:var(--mgt)}.c-LEAD{--c:var(--lead)}
 .runway{display:grid;gap:10px}
 .runway ol{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
@@ -207,8 +212,37 @@ const GROUPS=[["c","Cases to prepare"],["r","Reading"],["w","Watch"],["t","To do
 const LBL={c:"Case",r:"Read",w:"Watch",t:"To do",o:"Additional"};
 function load(){try{return JSON.parse(localStorage.getItem("a2-done")||"{}")}catch(e){return {}}}
 function save(o){try{localStorage.setItem("a2-done",JSON.stringify(o))}catch(e){}}
+
+const toMin=x=>{const [h,m]=x.split(":").map(Number);return h*60+m};
+const fmtDur=m=>m>=60?(m%60?`${Math.floor(m/60)} h ${m%60} min`:`${m/60} h`):`${m} min`;
+function brkRow(a,b,label){const d=toMin(b)-toMin(a);return `<div class="brk"><div class="time">${a}–${b}</div><div class="lbl">${label}<span class="dur">${fmtDur(d)}</span></div></div>`}
+function brkLabel(d,a,b){if(d.name.startsWith("Friday")&&a==="11:30")return "Jumaa prayer + lunch";return toMin(b)-toMin(a)>=45?"Lunch break":"Break"}
+function blockCard(w,[t,c,code,topic,p,o={}],timeText){
+       if(c==="FIN"&&FIN_TBC&&!FIN_OK.has(w.id)){code="FIN512";topic="Financial Accounting";p={n:["Topic and pre-reading for this class are being confirmed"]};o={};}
+       const rows=GROUPS.map(([k])=>k).filter(k=>(p[k]||[]).length).map(k=>`<dt>${LBL[k]}</dt><dd>${p[k].map(esc).join("<br>")}</dd>`).join("");
+       return `<div class="blk c-${c}"><div class="time">${esc(timeText)}</div>
+       <div class="body"><div class="code">${esc(code)}${o.est?'<span class="est">est.</span>':""}${c==="FIN"?'<span class="est">no AI</span>':""}</div>
+        <div class="topic">${o.due?`<span class="pill">${esc(o.due)}</span>`:""}${esc(topic)}</div>
+        ${(p.n||[]).length?`<div class="note">${p.n.map(esc).join(" · ")}</div>`:""}
+        ${rows?`<div class="prep"><dl>${rows}</dl></div>`:((p.n||[]).length?"":`<div class="prep">No prep listed.</div>`)}</div></div>`}
+function dayRows(d){
+  const w=CURW, out=[]; let prevEnd=null;
+  d.blocks.forEach((b,bi)=>{
+    const segs=b[0].split("\n").map(r=>r.split("–"));
+    if(prevEnd===null){ if(toMin(segs[0][0])>toMin(d.start)) out.push(brkRow(d.start,segs[0][0],"Leaders' Morning Activity")); }
+    else if(toMin(segs[0][0])>toMin(prevEnd)) out.push(brkRow(prevEnd,segs[0][0],brkLabel(d,prevEnd,segs[0][0])));
+    out.push(blockCard(w,b,segs[0].join("–")));
+    for(let k=1;k<segs.length;k++){
+      out.push(brkRow(segs[k-1][1],segs[k][0],brkLabel(d,segs[k-1][1],segs[k][0])));
+      out.push(`<div class="blk c-${b[1]}"><div class="time">${segs[k].join("–")}</div><div class="body"><div class="code">${esc(b[2].split(" ·")[0])}</div><div class="cont">${esc(b[1]==="FIN"&&FIN_TBC&&!FIN_OK.has(w.id)?"Financial Accounting":b[3])} (continued)</div></div></div>`);
+    }
+    prevEnd=segs[segs.length-1][1];
+  });
+  return out.join("");
+}
+let CURW=null;
 function render(i){
-  const w=W[i], done=load();
+  const w=W[i], done=load(); CURW=w;
   document.querySelectorAll("#picker button").forEach((b,j)=>b.setAttribute("aria-pressed",j===i?"true":"false"));
   const tag=i===curIdx?"This weekend":i===nextIdx?"Next weekend":"";
   document.getElementById("title").textContent=(tag?tag+": ":"Class weekend ")+w.label;
@@ -227,15 +261,8 @@ function render(i){
    <div class="prepbox" style="margin-top:14px"><h3>Pre-readings and cases</h3><p class="hint">Everything to read before this weekend. Tick items as you go; your ticks stay on this device only.</p>
     ${groups?`<div class="groups">${groups}</div>`:`<p class="none">No pre-readings or cases listed for this weekend. Check Blackboard.</p>`}</div>
    <div class="days" style="margin-top:16px">${w.days.map(d=>`
-    <article class="day"><h3>${esc(d.name)}<small>Leaders' activity ${esc(d.start)}</small></h3>
-     ${d.blocks.map(([t,c,code,topic,p,o={}])=>{
-       if(c==="FIN"&&FIN_TBC&&!FIN_OK.has(w.id)){code="FIN512";topic="Financial Accounting";p={n:["Topic and pre-reading for this class are being confirmed"]};o={};}
-       const rows=GROUPS.map(([k])=>k).filter(k=>(p[k]||[]).length).map(k=>`<dt>${LBL[k]}</dt><dd>${p[k].map(esc).join("<br>")}</dd>`).join("");
-       return `<div class="blk c-${c}"><div class="time">${esc(t).replace("\n","<br>")}</div>
-       <div class="body"><div class="code">${esc(code)}${o.est?'<span class="est">est.</span>':""}${c==="FIN"?'<span class="est">no AI</span>':""}</div>
-        <div class="topic">${o.due?`<span class="pill">${esc(o.due)}</span>`:""}${esc(topic)}</div>
-        ${(p.n||[]).length?`<div class="note">${p.n.map(esc).join(" · ")}</div>`:""}
-        ${rows?`<div class="prep"><dl>${rows}</dl></div>`:((p.n||[]).length?"":`<div class="prep">No prep listed.</div>`)}</div></div>`}).join("")}
+    <article class="day"><h3>${esc(d.name)}</h3>
+     ${dayRows(d)}
     </article>`).join("")}</div>`;
   document.querySelectorAll("#weekend input[type=checkbox]").forEach(cb=>cb.addEventListener("change",()=>{const o=load();if(cb.checked)o[cb.dataset.id]=1;else delete o[cb.dataset.id];save(o)}));
   try{history.replaceState(null,"","#"+w.id)}catch(e){}
