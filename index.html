@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A2 Weekend Brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a weekend picker strip, then a two-day timeline (time rail + course blocks), then the deadline runway. */
+:root{
+  --bg:#f6f7f4; --surface:#ffffff; --ink:#18201c; --muted:#5d6862; --line:#dde2dc; --accent:#0f6b4f;
+  --ent:#c2410c; --ecn:#1d4ed8; --fin:#0f766e; --mgt:#7c3aed; --lead:#b45309;
+  --due-bg:#fde8e1; --due-ink:#9a2d0d;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111613; --surface:#1a201c; --ink:#e7ece8; --muted:#9aa59f; --line:#2c3530; --accent:#4fd1a5;
+  --ent:#fb923c; --ecn:#7aa2ff; --fin:#2dd4bf; --mgt:#b79bff; --lead:#f5b74a;
+  --due-bg:#3a1d14; --due-ink:#ffb59c; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#111613; --surface:#1a201c; --ink:#e7ece8; --muted:#9aa59f; --line:#2c3530; --accent:#4fd1a5;
+  --ent:#fb923c; --ecn:#7aa2ff; --fin:#2dd4bf; --mgt:#b79bff; --lead:#f5b74a;
+  --due-bg:#3a1d14; --due-ink:#ffb59c; color-scheme:dark;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);}
+.wrap{max-width:980px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
+header{display:grid;gap:6px}
+.eyebrow{font:500 12px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font:800 clamp(28px,5vw,44px)/1.05 var(--f-display);margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:0}
+.picker{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+.picker button{flex:none;font:500 13px var(--f-body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer}
+.picker button.past{color:var(--muted)}
+.picker button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.picker button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.picker .tag{font:500 10px var(--f-mono);letter-spacing:.06em;margin-left:6px;color:var(--accent)}
+.picker button[aria-pressed="true"] .tag{color:var(--bg)}
+.wk-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px}
+h2{font:600 24px/1.2 var(--f-display);margin:0}
+.venue{color:var(--muted);font-size:14px}
+.days{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;gap:14px;min-width:0}
+.day h3{font:600 17px var(--f-display);margin:0;display:flex;justify-content:space-between;gap:8px}
+.day h3 small{font:500 12px var(--f-mono);color:var(--muted);align-self:center}
+.blk{display:grid;grid-template-columns:96px 1fr;gap:12px;min-width:0}
+.time{font:500 12.5px/1.4 var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums;padding-top:2px}
+.body{border-left:3px solid var(--c);padding-left:12px;display:grid;gap:4px;min-width:0}
+.code{font:500 11.5px var(--f-mono);letter-spacing:.06em;color:var(--c)}
+.topic{font-weight:600}
+.prep{color:var(--muted);font-size:14px}
+.pill{display:inline-block;font:600 11px var(--f-body);letter-spacing:.04em;text-transform:uppercase;background:var(--due-bg);color:var(--due-ink);border-radius:4px;padding:2px 7px;margin-right:6px}
+.est{font:500 11px var(--f-mono);color:var(--muted);border:1px dashed var(--line);border-radius:4px;padding:1px 6px;margin-left:6px}
+.c-ENT{--c:var(--ent)}.c-ECN{--c:var(--ecn)}.c-FIN{--c:var(--fin)}.c-MGT{--c:var(--mgt)}.c-LEAD{--c:var(--lead)}
+.runway{display:grid;gap:10px}
+.runway ol{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.runway li{display:grid;grid-template-columns:120px 70px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.runway li.done{color:var(--muted)}
+.runway .d{font:500 13px var(--f-mono);font-variant-numeric:tabular-nums}
+.runway .cc{font:500 11.5px var(--f-mono);color:var(--c)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--c);margin-right:6px;vertical-align:-1px}
+
+.prepbox{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;gap:16px}
+.prepbox h3{font:600 17px var(--f-display);margin:0}
+.prepbox .hint{color:var(--muted);font-size:13px;margin:-10px 0 0}
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:18px}
+.grp h4{font:500 11.5px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;display:flex;justify-content:space-between}
+.grp ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.grp li label{display:grid;grid-template-columns:18px 1fr;gap:10px;align-items:start;cursor:pointer}
+.grp input{margin:3px 0 0;accent-color:var(--accent);width:16px;height:16px}
+.grp .it{min-width:0}
+.grp .meta{display:block;font:500 11px var(--f-mono);color:var(--c);letter-spacing:.04em}
+.grp input:checked + .it{color:var(--muted);text-decoration:line-through}
+.none{color:var(--muted);font-size:14px}
+.note{font-size:13px;color:var(--muted);font-style:italic}
+.prep dl{margin:2px 0 0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:14px}
+.prep dt{font:500 11px/1.9 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.prep dd{margin:0;min-width:0}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+@media (max-width:520px){.blk{grid-template-columns:1fr;gap:4px}.runway li{grid-template-columns:90px 1fr}.runway .cc{grid-column:2}.runway .t{grid-column:1/-1}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">MBSC · EMBA Class of 2028 · Group Weekend A2</div>
+    <h1 id="title">Class weekend</h1>
+    <p class="sub">What to prepare for each class weekend, and what's due. Pick a weekend below.</p>
+  </header>
+
+  <nav class="picker" id="picker" aria-label="Choose a class weekend"></nav>
+
+  <section id="weekend" aria-live="polite"></section>
+
+  <div class="legend" aria-label="Course colors">
+    <span class="c-ENT">ENT511 Entrepreneurial Mindset · Dr. Roomi</span>
+    <span class="c-ECN">ECN511 Economics for Managers · Dr. George</span>
+    <span class="c-FIN">FIN512 Financial Accounting · Dr. Al-Htaybat</span>
+    <span class="c-MGT">MGT532 Data, Decisions, Risk</span>
+    <span class="c-LEAD">LEAD501 Effectiveness Skills</span>
+  </div>
+
+  <section class="runway">
+    <h2>Deadlines</h2>
+    <ol id="deadlines"></ol>
+  </section>
+
+  <footer>Built from the official A2 Weekend class schedule and the course syllabi. Where the two disagree, this page follows the class schedule. FIN512 does not allow AI use in any of its work, marked <span class="est">no AI</span>. FIN512 classes are matched one per class day in order, because the FIN512 syllabus has no dates. Classes 8 and 9 share the last day, marked <span class="est">est.</span>. ENT511 readings follow the syllabus's own split: "E. Readings" are shown as Reading and "A. Readings" as Additional reading. The syllabus doesn't say whether the A. Readings are optional. FIN512 readings and videos are listed in its syllabus as class preparation. Check Blackboard for changes.</footer>
+</div>
+
+<script>
+const V_STC="Riyadh · STC Academy, Classroom 5/6";
+// Books (all on Blackboard or the library)
+const BY="Bygrave & Zacharakis, Entrepreneurship", BU="Burns, Entrepreneurship and Small Business",
+      HI="Higgins, Analysis for Financial Management", IF="Weygandt et al., Financial Accounting: IFRS";
+// block: [time, course, code, topic, prep{r:read,w:watch,c:case,t:to-do}, opts]
+const W=[
+ {id:"oct16",label:"16–17 Oct",fri:"2026-10-16",venue:V_STC,days:[
+  {name:"Friday 16 Oct",start:"08:30",blocks:[
+   ["09:00–11:30\n13:30–14:00","ENT","ENT511 · S1–2","Entrepreneurship overview · Entrepreneurial Thought & Action",{r:[BY+" Ch.1–2"],o:[BU+" Ch.1–2","What Makes Entrepreneurs Entrepreneurial? (Sarasvathy)","The Entrepreneur: Concepts and Evidence","PEC self-rating questionnaire"],c:["Steve Jobs – The Silicon Valley Pioneer"]}],
+   ["14:15–17:30","ECN","ECN511 · S1–2","Intro to Economics · Demand & Supply",{}],
+   ["17:45–21:00","FIN","FIN512 · Class 1","Value Creation · Sim 1 starts (Coffee Shop)",{w:["Aramex video"],r:["How I Did It: The CEO of Aramex on Turning a Failed Sale into a Huge Opportunity","The CFO & Finance-Function Role in Value-Creation"],n:["DIY 1 (Value Creation Model) assigned, due 27 Feb"]}]]},
+  {name:"Saturday 17 Oct",start:"08:30",blocks:[
+   ["09:00–12:15","FIN","FIN512 · Class 2","Sim 1: Business Essentials (Coffee Shop) · Financial Value begins",{n:["Sim 1 is done in class, 15% of the grade"]}],
+   ["13:15–16:30","ENT","ENT511 · S3–4","Opportunity Recognition · Idea Generation",{r:[BY+" Ch.3"],o:[BU+" Ch.3–4"],c:["R&R (HBS 9-386-019)","The Hard Road: Steps on an Entrepreneurial Journey"]}]]}]},
+ {id:"oct30",label:"30–31 Oct",fri:"2026-10-30",venue:V_STC,days:[
+  {name:"Friday 30 Oct",start:"08:30",blocks:[
+   ["09:00–11:30\n13:30–14:00","FIN","FIN512 · Class 3","Financial Value",{w:["Nvidia video","P&L video","Cash-Flow video"],r:[IF+" Ch.1–4 and Ch.13"],n:["Pre-reading for classes 3 and 4. DIY 2 (Cloud-Link Financial Performance) is part of this topic, due 27 Feb"]}],
+   ["14:15–17:30","ENT","ENT511 · S5–6","Business Models · Start-up: Setting It All Up",{r:[BY+" Ch.4–5"],o:[BU+" Ch.5"],c:["UBER: An Empire in the Making","Jahez: Another Saudi Unicorn in the Making?"]}],
+   ["17:45–21:00","ECN","ECN511 · S3–4","Demand & Supply · Group project launch with DGA",{t:["Agree on a Saudi sector with your group before class"]},{due:"Launch"}]]},
+  {name:"Saturday 31 Oct",start:"08:30",blocks:[
+   ["09:00–12:15","ECN","ECN511 · S5–6","Interaction of demand & supply · Growth & Unemployment",{}],
+   ["13:15–16:30","FIN","FIN512 · Class 4","Financial Value (continued)",{n:["Same pre-reading as class 3. The Data Detective simulation (in class, 10%) and the Nvidia homework (due 27 Feb) are part of this topic"]}]]}]},
+ {id:"nov13",label:"13–14 Nov",fri:"2026-11-13",venue:V_STC,days:[
+  {name:"Friday 13 Nov",start:"08:30",blocks:[
+   ["09:00–11:30\n13:30–14:00","ECN","ECN511 · S7–8","Fiscal & Monetary Policy · Trade · Multipliers",{}],
+   ["14:15–17:30","FIN","FIN512 · Class 5","Planning Financial Growth",{w:["Saudi Coffee Company video"],r:[HI+" Ch.3–4"],n:["DIY 3 (Financial Plan, Saudi Coffee Startup) assigned, due 27 Feb"]}]]},
+  {name:"Saturday 14 Nov",start:"08:30",blocks:[
+   ["09:00–12:15","ENT","ENT511 · S7–8","Building the Team · The Agentic Venture",{r:[BY+" Ch.6"],o:["AI for Startups Ch.1–2"],c:["Human and social capital caselets","AI Startups caselets: Base 44 and MEDVI"],t:["Submit your project proposal naming the entrepreneur"]},{due:"Proposal due"}],
+   ["13:15–16:30","ECN","ECN511 · S9–10","Elasticity of demand & supply",{}]]}]},
+ {id:"nov27",label:"27–28 Nov",fri:"2026-11-27",venue:V_STC,days:[
+  {name:"Friday 27 Nov",start:"08:30",blocks:[
+   ["09:00–11:30\n13:30–14:00","ENT","ENT511 · S9–10","Start-up: Financing",{r:[BY+" Ch.8–11"],o:[BU+" Ch.7"],c:["Unifonic: The Growth of a Startup from a Messaging Service to a SaaS Provider","Organic Apoteke – Being Spoilt for Choice is Not Always Easy"]}],
+   ["14:15–17:30","ECN","ECN511 · S11–12","In-class test · Elasticity · Economic Efficiency",{t:["Revise for the individual test (30%): sessions 1–10"]},{due:"Test"}]]},
+  {name:"Saturday 28 Nov",start:"08:30",blocks:[
+   ["09:00–12:15","FIN","FIN512 · Class 6","Sim 3: Managing Working Capital",{n:["Done in class, 15% of the grade. Reflection report due 27 Feb"]}],
+   ["13:15–16:30","ENT","ENT511 · S11–12","Growth: Models · Growth: Strategies",{r:[BY+" Ch.12–13"],o:[BU+" Ch.10–11"],c:["Growing Pains","Azza Fehmi Jewelry: International Expansion"],t:["Submit the Teaching Case + Teaching Note on Blackboard by 23:59"]},{due:"Due 23:59"}]]}]},
+ {id:"dec11",label:"11–12 Dec",fri:"2026-12-11",venue:V_STC,days:[
+  {name:"Friday 11 Dec",start:"08:30",blocks:[
+   ["09:00–11:30\n13:30–14:00","ECN","ECN511 · S13–14","Economic Efficiency · Government Interventions",{}],
+   ["14:15–17:30","FIN","FIN512 · Class 7","Managing Working Capital",{w:["ABS video (Arabic, use subtitles). The Financial Health video is shown in class only"],r:[HI+" Ch.3–6"]}]]},
+  {name:"Saturday 12 Dec",start:"08:30",blocks:[
+   ["09:00–12:15","ECN","ECN511 · S15–16","Group presentations",{t:["Rehearse the 8-minute group presentation: sector, economics topic, EPP & localisation, recommendation"],n:["All group members must attend"]},{due:"Presentation"}],
+   ["13:15–16:30","FIN","FIN512 · Classes 8–9","Sim 4: Back Bay Battery v3 · Enhancing Profitability (last class)",{w:["All The Ways BYD Is Leaving Tesla in the Dust","Why Starbucks is Struggling with Value Wars","Starbucks CEO interview"],n:["The syllabus has 9 classes but only 8 FIN512 class days, so classes 8 and 9 are both placed here. Sim 4 is done in class, 15%, with the reflection report due 27 Feb. DIY 4 (IKEA's Home Share) assigned, due 27 Feb"]},{est:1}]]}]},
+ {id:"dec18",label:"18–19 Dec",fri:"2026-12-18",venue:"Riyadh · Crowne Plaza RDC, Ibn Batouta 3",days:[
+  {name:"Friday 18 Dec",start:"08:30",blocks:[
+   ["09:00–11:30\n13:30–17:30","MGT","MGT532","Data, Decisions, Risk · Dr. Mario Vanhoucke",{n:["Different venue: Crowne Plaza RDC"],t:["Check Blackboard for pre-reading (syllabus not shared yet)"]}]]},
+  {name:"Saturday 19 Dec",start:"08:30",blocks:[
+   ["09:00–12:15\n13:15–16:30","MGT","MGT532","Data, Decisions, Risk · Dr. Mario Vanhoucke",{}]]}]},
+ {id:"jan08",label:"8–9 Jan",fri:"2027-01-08",venue:V_STC,days:[
+  {name:"Friday 8 Jan",start:"13:45",blocks:[
+   ["14:15–17:30","ENT","ENT511 · S13–14","Entrepreneurial Leadership (1) and (2)",{r:[BU+" Ch.8"],c:["Richard Branson / Herb Kelleher: Leader Extraordinaire"]}]]},
+  {name:"Saturday 9 Jan",start:"08:30",blocks:[
+   ["09:00–12:15","MGT","MGT532","Data, Decisions, Risk · Dr. Ali Hajjar",{}],
+   ["13:15–16:30","LEAD","LEAD501","LEAD 1: Effectiveness Skills · Dr. Kimberly Deatherage-Mominah",{}]]}]},
+ {id:"jan22",label:"22–23 Jan",fri:"2027-01-22",venue:V_STC,days:[
+  {name:"Friday 22 Jan",start:"08:30",blocks:[
+   ["09:00–11:30\n13:30–14:00","MGT","MGT532","Data, Decisions, Risk · Dr. Ali Hajjar",{}],
+   ["14:15–17:30","ENT","ENT511 · S15–16","Corporate & Social Entrepreneurship (last class)",{r:[BU+" Ch.17–18"],o:["Yunus & Weber, Why Social Business"],c:["3M","Glowork"]}]]},
+  {name:"Saturday 23 Jan",start:"08:30",blocks:[
+   ["09:00–12:15","LEAD","LEAD501","LEAD 1 · Dr. Kimberly Deatherage-Mominah",{}],
+   ["13:15–16:30","MGT","MGT532","Data, Decisions, Risk · Dr. Ali Hajjar",{}]]}]},
+ {id:"feb05",label:"5–6 Feb",fri:"2027-02-05",venue:V_STC,days:[
+  {name:"Friday 5 Feb",start:"08:30",blocks:[
+   ["09:00–11:30\n13:30–14:00","LEAD","LEAD501","LEAD 1 · Dr. Haya Aldajani",{}],
+   ["14:15–17:30","LEAD","LEAD501","LEAD 1 · Dr. Kimberly Deatherage-Mominah",{}]]},
+  {name:"Saturday 6 Feb",start:"08:30",blocks:[
+   ["09:00–12:15","LEAD","LEAD501","LEAD 1 · Dr. Haya Aldajani",{}],
+   ["13:15–16:30","MGT","MGT532","Data, Decisions, Risk · Dr. Ali Hajjar",{}]]}]}
+];
+const D=[
+ ["2026-10-30","Fri 30 Oct","ECN","ECN511","Group project launch with DGA (in class)"],
+ ["2026-11-14","Sat 14 Nov","ENT","ENT511","Project proposal: name your entrepreneur"],
+ ["2026-11-27","Fri 27 Nov","ECN","ECN511","Individual in-class test · 30%"],
+ ["2026-11-28","Sat 28 Nov","ENT","ENT511","Teaching Case (50%) + Teaching Note (25%), 23:59 on Blackboard"],
+ ["2026-12-12","Sat 12 Dec","ECN","ECN511","Group presentation · 30%"],
+ ["2026-12-14","Mon 14 Dec","ECN","ECN511","Individual reflection · 10%"],
+ ["2026-12-26","Sat 26 Dec","ECN","ECN511","Group report, 8–10 page EPP playbook · 30%"],
+ ["2027-02-27","Sat 27 Feb","FIN","FIN512","4 DIYs (20%), Sim 3+4 reflections (10%), Nvidia AI-focused analysis (15%)"]
+];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const today=new Date(); today.setHours(0,0,0,0);
+const day=s=>{const d=new Date(s+"T00:00:00");return d};
+const sat=w=>{const d=day(w.fri);d.setDate(d.getDate()+1);return d};
+let nextIdx=W.findIndex(w=>day(w.fri)>today); if(nextIdx<0) nextIdx=W.length-1;
+const curIdx=W.findIndex(w=>day(w.fri)<=today && sat(w)>=today);
+
+const FIN_TBC=true; // FIN512 class-to-date mapping not confirmed yet
+const FIN_OK=new Set(["oct30"]); // weekends whose FIN512 prep Majed confirmed (classes 3–4)
+const GROUPS=[["c","Cases to prepare"],["r","Reading"],["w","Watch"],["t","To do & submit"],["o","Additional reading"]];
+const LBL={c:"Case",r:"Read",w:"Watch",t:"To do",o:"Additional"};
+function load(){try{return JSON.parse(localStorage.getItem("a2-done")||"{}")}catch(e){return {}}}
+function save(o){try{localStorage.setItem("a2-done",JSON.stringify(o))}catch(e){}}
+function render(i){
+  const w=W[i], done=load();
+  document.querySelectorAll("#picker button").forEach((b,j)=>b.setAttribute("aria-pressed",j===i?"true":"false"));
+  const tag=i===curIdx?"This weekend":i===nextIdx?"Next weekend":"";
+  document.getElementById("title").textContent=(tag?tag+": ":"Class weekend ")+w.label;
+  const items={c:[],r:[],w:[],t:[],o:[]};
+  w.days.forEach(d=>d.blocks.forEach(([t,c,code,topic,p])=>{
+    if(c==="FIN"&&FIN_TBC&&!FIN_OK.has(w.id)) return;
+    for(const k in items)(p[k]||[]).forEach(x=>items[k].push({x,c,code:code.split(" ·")[0],day:d.name.split(" ")[0].slice(0,3)}));
+  }));
+  const LIST=new Set(["c","r","o"]);
+  const groups=GROUPS.filter(([k])=>LIST.has(k)&&items[k].length).map(([k,h])=>`
+    <div class="grp"><h4><span>${h}</span><span>${items[k].length}</span></h4><ul>${items[k].map(it=>{
+      const id=w.id+"|"+k+"|"+it.code+"|"+it.x;
+      return `<li class="c-${it.c}"><label><input type="checkbox" data-id="${esc(id)}"${done[id]?" checked":""}><span class="it"><span class="meta">${esc(it.code)} · ${esc(it.day)}</span>${esc(it.x)}</span></label></li>`}).join("")}</ul></div>`).join("");
+  document.getElementById("weekend").innerHTML=`
+   <div class="wk-head"><h2>${esc(w.label)}</h2><span class="venue">${esc(w.venue)}</span></div>
+   <div class="prepbox" style="margin-top:14px"><h3>Pre-readings and cases</h3><p class="hint">Everything to read before this weekend. Tick items as you go; your ticks stay on this device only.</p>
+    ${groups?`<div class="groups">${groups}</div>`:`<p class="none">No pre-readings or cases listed for this weekend. Check Blackboard.</p>`}</div>
+   <div class="days" style="margin-top:16px">${w.days.map(d=>`
+    <article class="day"><h3>${esc(d.name)}<small>Leaders' activity ${esc(d.start)}</small></h3>
+     ${d.blocks.map(([t,c,code,topic,p,o={}])=>{
+       if(c==="FIN"&&FIN_TBC&&!FIN_OK.has(w.id)){code="FIN512";topic="Financial Accounting";p={n:["Topic and pre-reading for this class are being confirmed"]};o={};}
+       const rows=GROUPS.map(([k])=>k).filter(k=>(p[k]||[]).length).map(k=>`<dt>${LBL[k]}</dt><dd>${p[k].map(esc).join("<br>")}</dd>`).join("");
+       return `<div class="blk c-${c}"><div class="time">${esc(t).replace("\n","<br>")}</div>
+       <div class="body"><div class="code">${esc(code)}${o.est?'<span class="est">est.</span>':""}${c==="FIN"?'<span class="est">no AI</span>':""}</div>
+        <div class="topic">${o.due?`<span class="pill">${esc(o.due)}</span>`:""}${esc(topic)}</div>
+        ${(p.n||[]).length?`<div class="note">${p.n.map(esc).join(" · ")}</div>`:""}
+        ${rows?`<div class="prep"><dl>${rows}</dl></div>`:((p.n||[]).length?"":`<div class="prep">No prep listed.</div>`)}</div></div>`}).join("")}
+    </article>`).join("")}</div>`;
+  document.querySelectorAll("#weekend input[type=checkbox]").forEach(cb=>cb.addEventListener("change",()=>{const o=load();if(cb.checked)o[cb.dataset.id]=1;else delete o[cb.dataset.id];save(o)}));
+  try{history.replaceState(null,"","#"+w.id)}catch(e){}
+}
+const picker=document.getElementById("picker");
+W.forEach((w,i)=>{
+  const b=document.createElement("button");b.type="button";
+  if(sat(w)<today) b.className="past";
+  b.innerHTML=esc(w.label)+(i===nextIdx?'<span class="tag">NEXT</span>':i===curIdx?'<span class="tag">NOW</span>':"");
+  b.onclick=()=>render(i); picker.appendChild(b);
+});
+document.getElementById("deadlines").innerHTML=D.map(([iso,d,c,code,t])=>
+ `<li class="c-${c}${day(iso)<today?" done":""}"><span class="d">${d}</span><span class="cc">${code}</span><span class="t">${esc(t)}</span></li>`).join("");
+const h=(location.hash||"").slice(1); const hi=W.findIndex(w=>w.id===h);
+render(hi>=0?hi:nextIdx);
+picker.children[hi>=0?hi:nextIdx]?.scrollIntoView({block:"nearest",inline:"center"});
+</script>
+
+</body>
+</html>
