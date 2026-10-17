@@ -116,7 +116,7 @@ footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);paddin
     <ol id="deadlines"></ol>
   </section>
 
-  <footer>Built from the official A2 Weekend class schedule and the course syllabi. Where the two disagree, this page follows the class schedule. FIN512 does not allow AI use in any of its work, marked <span class="est">no AI</span>. FIN512 classes are matched one per class day in order, because the FIN512 syllabus has no dates. Classes 8 and 9 share the last day, marked <span class="est">est.</span>. ENT511 readings follow the syllabus's own split: "E. Readings" are shown as Reading and "A. Readings" as Additional reading. The syllabus doesn't say whether the A. Readings are optional. FIN512 readings and videos are listed in its syllabus as class preparation. Check Blackboard for changes.</footer>
+  <footer>Built from the official A2 Weekend class schedule and the course syllabi. Where the two disagree, this page follows the class schedule. FIN512 does not allow AI use in any of its work, marked <span class="est">no AI</span>. FIN512 topics are a planned spread across its class days. The syllabus has no dates and the instructor moves with the class's pace, so they may shift. ENT511 readings follow the syllabus's own split: "E. Readings" are shown as Reading and "A. Readings" as Additional reading. The syllabus doesn't say whether the A. Readings are optional. FIN512 readings and videos are listed in its syllabus as class preparation. Check Blackboard for changes.</footer>
 </div>
 
 <script>
@@ -154,15 +154,15 @@ const W=[
    ["09:00–11:30\n13:30–14:00","ENT","ENT511 · S9–10","Start-up: Financing",{r:[BY+" Ch.8–11"],o:[BU+" Ch.7"],c:["Unifonic: The Growth of a Startup from a Messaging Service to a SaaS Provider","Organic Apoteke – Being Spoilt for Choice is Not Always Easy"]}],
    ["14:15–17:30","ECN","ECN511 · S11–12","In-class test · Elasticity · Economic Efficiency",{t:["Revise for the individual test (30%): sessions 1–10"]},{due:"Test"}]]},
   {name:"Saturday 28 Nov",start:"08:30",blocks:[
-   ["09:00–12:15","FIN","FIN512 · Class 6","Sim 3: Managing Working Capital",{n:["Done in class, 15% of the grade. Reflection report due 27 Feb"]}],
+   ["09:00–12:15","FIN","FIN512 · Classes 6–7","Managing Working Capital · Sim 3: Working Capital",{w:["ABS video (Arabic, use subtitles). The Financial Health video is shown in class only"],r:[HI+" Ch.3–6"],n:["Sim 3 is done in class, 15% of the grade. Reflection report due 27 Feb"]}],
    ["13:15–16:30","ENT","ENT511 · S11–12","Growth: Models · Growth: Strategies",{r:[BY+" Ch.12–13"],o:[BU+" Ch.10–11"],c:["Growing Pains","Azza Fehmi Jewelry: International Expansion"],t:["Submit the Teaching Case + Teaching Note on Blackboard by 23:59"]},{due:"Due 23:59"}]]}]},
  {id:"dec11",label:"11–12 Dec",fri:"2026-12-11",venue:V_STC,days:[
   {name:"Friday 11 Dec",start:"08:30",blocks:[
    ["09:00–11:30\n13:30–14:00","ECN","ECN511 · S13–14","Economic Efficiency · Government Interventions",{}],
-   ["14:15–17:30","FIN","FIN512 · Class 7","Managing Working Capital",{w:["ABS video (Arabic, use subtitles). The Financial Health video is shown in class only"],r:[HI+" Ch.3–6"]}]]},
+   ["14:15–17:30","FIN","FIN512 · Class 9","Enhancing Profitability",{w:["All The Ways BYD Is Leaving Tesla in the Dust","Why Starbucks is Struggling with Value Wars","Starbucks CEO interview"],n:["DIY 4 (IKEA's Home Share) is part of this topic, due 27 Feb"]}]]},
   {name:"Saturday 12 Dec",start:"08:30",blocks:[
    ["09:00–12:15","ECN","ECN511 · S15–16","Group presentations",{t:["Rehearse the 8-minute group presentation: sector, economics topic, EPP & localisation, recommendation"],n:["All group members must attend"]},{due:"Presentation"}],
-   ["13:15–16:30","FIN","FIN512 · Classes 8–9","Sim 4: Back Bay Battery v3 · Enhancing Profitability (last class)",{w:["All The Ways BYD Is Leaving Tesla in the Dust","Why Starbucks is Struggling with Value Wars","Starbucks CEO interview"],n:["The syllabus has 9 classes but only 8 FIN512 class days, so classes 8 and 9 are both placed here. Sim 4 is done in class, 15%, with the reflection report due 27 Feb. DIY 4 (IKEA's Home Share) assigned, due 27 Feb"]},{est:1}]]}]},
+   ["13:15–16:30","FIN","FIN512 · Class 8","Sim 4: Back Bay Battery v3 (last class)",{n:["Done in class, 15% of the grade. Reflection report due 27 Feb"]}]]}]},
  {id:"dec18",label:"18–19 Dec",fri:"2026-12-18",venue:"Riyadh · Crowne Plaza RDC, Ibn Batouta 3",days:[
   {name:"Friday 18 Dec",start:"08:30",blocks:[
    ["09:00–11:30\n13:30–17:30","MGT","MGT532","Data, Decisions, Risk · Dr. Mario Vanhoucke",{n:["Different venue: Crowne Plaza RDC"],t:["Check Blackboard for pre-reading (syllabus not shared yet)"]}]]},
@@ -206,8 +206,9 @@ const sat=w=>{const d=day(w.fri);d.setDate(d.getDate()+1);return d};
 let nextIdx=W.findIndex(w=>day(w.fri)>today); if(nextIdx<0) nextIdx=W.length-1;
 const curIdx=W.findIndex(w=>day(w.fri)<=today && sat(w)>=today);
 
-const FIN_TBC=true; // FIN512 class-to-date mapping not confirmed yet
+const FIN_TBC=false; // FIN512 topics are a planned distribution (pace-dependent), shown as planned
 const FIN_OK=new Set(["oct30"]); // weekends whose FIN512 prep Majed confirmed (classes 3–4)
+const finShown=(w,o)=>!FIN_TBC||FIN_OK.has(w.id)||(o&&o.ok); // block-level {ok:1} also counts
 const GROUPS=[["c","Cases to prepare"],["r","Reading"],["w","Watch"],["t","To do & submit"],["o","Additional reading"]];
 const LBL={c:"Case",r:"Read",w:"Watch",t:"To do",o:"Additional"};
 function load(){try{return JSON.parse(localStorage.getItem("a2-done")||"{}")}catch(e){return {}}}
@@ -218,7 +219,7 @@ const fmtDur=m=>m>=60?(m%60?`${Math.floor(m/60)} h ${m%60} min`:`${m/60} h`):`${
 function brkRow(a,b,label){const d=toMin(b)-toMin(a);return `<div class="brk"><div class="time">${a}–${b}</div><div class="lbl">${label}<span class="dur">${fmtDur(d)}</span></div></div>`}
 function brkLabel(d,a,b){if(d.name.startsWith("Friday")&&a==="11:30")return "Jumaa prayer + lunch";return toMin(b)-toMin(a)>=45?"Lunch break":"Break"}
 function blockCard(w,[t,c,code,topic,p,o={}],timeText){
-       if(c==="FIN"&&FIN_TBC&&!FIN_OK.has(w.id)){code="FIN512";topic="Financial Accounting";p={n:["Topic and pre-reading for this class are being confirmed"]};o={};}
+       if(c==="FIN"&&!finShown(w,o)){code="FIN512";topic="Financial Accounting";p={n:["Topic and pre-reading for this class are being confirmed"]};o={};}
        const rows=GROUPS.map(([k])=>k).filter(k=>(p[k]||[]).length).map(k=>`<dt>${LBL[k]}</dt><dd>${p[k].map(esc).join("<br>")}</dd>`).join("");
        return `<div class="blk c-${c}"><div class="time">${esc(timeText)}</div>
        <div class="body"><div class="code">${esc(code)}${o.est?'<span class="est">est.</span>':""}${c==="FIN"?'<span class="est">no AI</span>':""}</div>
@@ -234,7 +235,7 @@ function dayRows(d){
     out.push(blockCard(w,b,segs[0].join("–")));
     for(let k=1;k<segs.length;k++){
       out.push(brkRow(segs[k-1][1],segs[k][0],brkLabel(d,segs[k-1][1],segs[k][0])));
-      out.push(`<div class="blk c-${b[1]}"><div class="time">${segs[k].join("–")}</div><div class="body"><div class="code">${esc(b[2].split(" ·")[0])}</div><div class="cont">${esc(b[1]==="FIN"&&FIN_TBC&&!FIN_OK.has(w.id)?"Financial Accounting":b[3])} (continued)</div></div></div>`);
+      out.push(`<div class="blk c-${b[1]}"><div class="time">${segs[k].join("–")}</div><div class="body"><div class="code">${esc(b[2].split(" ·")[0])}</div><div class="cont">${esc(b[1]==="FIN"&&!finShown(w,b[5])?"Financial Accounting":b[3])} (continued)</div></div></div>`);
     }
     prevEnd=segs[segs.length-1][1];
   });
@@ -247,8 +248,8 @@ function render(i){
   const tag=i===curIdx?"This weekend":i===nextIdx?"Next weekend":"";
   document.getElementById("title").textContent=(tag?tag+": ":"Class weekend ")+w.label;
   const items={c:[],r:[],w:[],t:[],o:[]};
-  w.days.forEach(d=>d.blocks.forEach(([t,c,code,topic,p])=>{
-    if(c==="FIN"&&FIN_TBC&&!FIN_OK.has(w.id)) return;
+  w.days.forEach(d=>d.blocks.forEach(([t,c,code,topic,p,o])=>{
+    if(c==="FIN"&&!finShown(w,o)) return;
     for(const k in items)(p[k]||[]).forEach(x=>items[k].push({x,c,code:code.split(" ·")[0],day:d.name.split(" ")[0].slice(0,3)}));
   }));
   const LIST=new Set(["c","r","o"]);
