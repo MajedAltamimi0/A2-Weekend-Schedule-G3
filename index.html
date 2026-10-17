@@ -252,14 +252,14 @@ function render(i){
     if(c==="FIN"&&!finShown(w,o)) return;
     for(const k in items)(p[k]||[]).forEach(x=>items[k].push({x,c,code:code.split(" ·")[0],day:d.name.split(" ")[0].slice(0,3)}));
   }));
-  const LIST=new Set(["c","r","o"]);
+  const LIST=new Set(["c","r","w","o"]);
   const groups=GROUPS.filter(([k])=>LIST.has(k)&&items[k].length).map(([k,h])=>`
     <div class="grp"><h4><span>${h}</span><span>${items[k].length}</span></h4><ul>${items[k].map(it=>{
       const id=w.id+"|"+k+"|"+it.code+"|"+it.x;
       return `<li class="c-${it.c}"><label><input type="checkbox" data-id="${esc(id)}"${done[id]?" checked":""}><span class="it"><span class="meta">${esc(it.code)} · ${esc(it.day)}</span>${esc(it.x)}</span></label></li>`}).join("")}</ul></div>`).join("");
   document.getElementById("weekend").innerHTML=`
    <div class="wk-head"><h2>${esc(w.label)}</h2><span class="venue">${esc(w.venue)}</span></div>
-   <div class="prepbox" style="margin-top:14px"><h3>Pre-readings and cases</h3><p class="hint">Everything to read before this weekend. Tick items as you go; your ticks stay on this device only.</p>
+   <div class="prepbox" style="margin-top:14px"><h3>Pre-readings and cases</h3><p class="hint">Everything to read or watch before this weekend. Tick items as you go; your ticks stay on this device only.</p>
     ${groups?`<div class="groups">${groups}</div>`:`<p class="none">No pre-readings or cases listed for this weekend. Check Blackboard.</p>`}</div>
    <div class="days" style="margin-top:16px">${w.days.map(d=>`
     <article class="day"><h3>${esc(d.name)}</h3>
